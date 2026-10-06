@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q Scents – POS</title>
+<style id="pageStyle">@page { size: 80mm auto; margin: 3mm; }</style>
+<style>
+:root{
+  --bg:#0e0f13; --panel:#171920; --panel2:#1f222b; --line:#2b2f3a; --text:#eceef3; --muted:#8b91a1;
+  --gold:#d4af37; --gold2:#f0d27a; --green:#22a559; --blue:#3b7bf0; --red:#e04b4b; --amber:#e8a93a;
+  --shadow:0 8px 24px rgba(0,0,0,.35); --r:12px;
+}
+[data-theme=light]{
+  --bg:#f3f4f7; --panel:#ffffff; --panel2:#f0f1f5; --line:#dcdfe6; --text:#1b1d24; --muted:#6a7082;
+  --gold:#b8921c; --gold2:#d4af37; --shadow:0 6px 18px rgba(20,25,40,.08);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+button{font-family:inherit}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px 16px}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111;display:grid;place-items:center;font-weight:800;font-size:20px}
+.brand b{display:block;font-size:16px;letter-spacing:.3px}
+.brand span{font-size:11px;color:var(--muted)}
+.nav{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;color:var(--muted);cursor:pointer;border:0;background:none;text-align:left;font-size:14px;width:100%}
+.nav:hover{background:var(--panel2);color:var(--text)}
+.nav.active{background:linear-gradient(90deg,rgba(212,175,55,.2),rgba(212,175,55,.04));color:var(--gold);font-weight:600;box-shadow:inset 3px 0 0 var(--gold)}
+.nav .ic{width:22px;text-align:center}
+.side .grow{flex:1}
+.main{padding:22px 26px;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+.topbar h1{margin:0;font-size:22px}
+.topbar small{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 12px;font-size:15px}
+.grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.row>div{flex:1 1 130px}
+label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.15)}
+.btn{padding:10px 16px;border:0;border-radius:8px;cursor:pointer;color:#fff;font-weight:600;font-size:13px;transition:.15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
+.btn.green{background:var(--green)} .btn.blue{background:var(--blue)} .btn.red{background:var(--red)}
+.btn.amber{background:var(--amber);color:#111} .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:5px 9px;font-size:12px}
+.btn.lg{padding:14px 18px;font-size:15px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.stat b{display:block;font-size:22px;margin-top:6px}
+.stat em{font-style:normal;font-size:12px;color:var(--muted)}
+.pos{color:var(--green)} .neg{color:var(--red)} .gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:rgba(127,127,127,.05)}
+.r{text-align:right} .c{text-align:center}
+.tablewrap{overflow-x:auto}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
+.badge.red{background:rgba(224,75,75,.15);color:var(--red);border-color:transparent}
+.badge.green{background:rgba(34,165,89,.15);color:var(--green);border-color:transparent}
+.badge.amber{background:rgba(232,169,58,.15);color:var(--amber);border-color:transparent}
+.empty{text-align:center;color:var(--muted);padding:26px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:6px 13px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:12px}
+.chip.active{background:var(--gold);color:#111;border-color:var(--gold);font-weight:600}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:340px;overflow:auto;padding:2px}
+.pcard{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:4px;min-height:74px}
+.pcard:hover{border-color:var(--gold);transform:translateY(-2px)}
+.pcard b{font-size:13px;line-height:1.2}
+.pcard span{color:var(--gold);font-weight:700}
+.pcard small{color:var(--muted);font-size:11px}
+.pcard.out{opacity:.5}
+.qty{display:inline-flex;align-items:center;gap:6px}
+.qty button{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+.totals p{display:flex;justify-content:space-between;margin:7px 0;color:var(--muted)}
+.totals p b,.totals p span:last-child{color:var(--text)}
+.totals .net{font-size:22px;font-weight:800;border-top:1px dashed var(--line);padding-top:12px;margin-top:10px;color:var(--gold)}
+.totals .net span:last-child{color:var(--gold)}
+.hidden{display:none!important}
+.bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:10px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.bar i{width:100%;max-width:46px;background:linear-gradient(180deg,var(--gold2),var(--gold));border-radius:6px 6px 0 0;min-height:3px;transition:.4s}
+.bar small{font-size:11px;color:var(--muted)} .bar em{font-style:normal;font-size:10px;color:var(--muted)}
+.hbar{margin:9px 0}
+.hbar div{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.hbar i{display:block;height:7px;border-radius:5px;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.toast-box{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:200}
+.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);padding:11px 16px;border-radius:8px;box-shadow:var(--shadow);animation:in .25s}
+.toast.err{border-left-color:var(--red)} .toast.ok{border-left-color:var(--green)}
+@keyframes in{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;z-index:150;padding:14px;backdrop-filter:blur(3px)}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
+.modal h3{margin:0 0 14px}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.lock{position:fixed;inset:0;background:var(--bg);z-index:300;display:grid;place-items:center}
+.lock .box{text-align:center;width:300px}
+.hint{color:var(--muted);font-size:12px}
+.banner{background:rgba(232,169,58,.12);border:1px solid var(--amber);color:var(--amber);padding:10px 14px;border-radius:10px;margin-bottom:14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* receipt */
+.rc{background:#fff;color:#000;padding:14px;border-radius:8px;font-size:12.5px;font-family:"Courier New",monospace}
+.rc h2{margin:0;text-align:center;font-size:20px;letter-spacing:1px}
+.rc p{margin:2px 0}.rc .t{text-align:center}
+.rc hr{border:0;border-top:1px dashed #000;margin:8px 0}
+.rc table th,.rc table td{border:0;border-bottom:1px dotted #888;padding:3px 2px;font-size:12px;color:#000;background:none;text-transform:none;letter-spacing:0}
+.rc .l{display:flex;justify-content:space-between;margin:3px 0}
+.rc .big{font-weight:bold;font-size:15px}
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  .app,.toast-box,.overlay,.lock,.celebrate{display:none!important}
+  #printArea{display:block!important}
+  #printArea .rc{border-radius:0;padding:0}
+}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;bottom:0;top:auto;left:0;right:0;height:auto;flex-direction:row;padding:6px;z-index:50;border-right:0;border-top:1px solid var(--line);overflow-x:auto}
+  .brand,.side .grow,.side .hide-m{display:none}
+  .nav{flex-direction:column;gap:2px;padding:7px 10px;font-size:11px;width:auto;min-width:64px;text-align:center}
+  .nav.active{box-shadow:none}
+  .main{padding:14px 12px 90px}
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+
+/* =====================================================================
+   ANIMATIONS
+   ===================================================================== */
+:root{--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes slideR{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes statin{from{opacity:0;transform:translateY(12px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes popOut{to{opacity:0;transform:scale(.95) translateY(6px)}}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
+@keyframes toastBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.25);color:var(--gold)}100%{transform:scale(1)}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-18px);background:rgba(212,175,55,.22)}to{opacity:1;transform:none;background:transparent}}
+@keyframes rowFlash{from{background:rgba(212,175,55,.22)}to{background:transparent}}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.45)}50%{box-shadow:0 0 0 8px rgba(212,175,55,0)}}
+@keyframes pulseRed{0%,100%{box-shadow:0 0 0 0 rgba(224,75,75,.45)}50%{box-shadow:0 0 0 5px rgba(224,75,75,0)}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ringPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes sheen{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+
+/* page / section entrance (replays every time a view renders) */
+.main>*{animation:rise .55s var(--ease) both}
+.main>*:nth-child(2){animation-delay:70ms}.main>*:nth-child(3){animation-delay:140ms}
+.main>*:nth-child(4){animation-delay:210ms}.main>*:nth-child(5){animation-delay:280ms}
+.main>*:nth-child(n+6){animation-delay:340ms}
+
+/* sidebar */
+.side .nav{animation:slideR .5s var(--ease) both}
+.side .nav:nth-of-type(2){animation-delay:.05s}.side .nav:nth-of-type(3){animation-delay:.1s}
+.side .nav:nth-of-type(4){animation-delay:.15s}.side .nav:nth-of-type(5){animation-delay:.2s}
+.side .nav:nth-of-type(6){animation-delay:.25s}.side .nav:nth-of-type(7){animation-delay:.3s}
+.nav{transition:background .2s,color .2s,transform .2s var(--ease),box-shadow .25s}
+.nav:hover{transform:translateX(4px)}
+.nav .ic{display:inline-block;transition:transform .3s var(--spring)}
+.nav:hover .ic,.nav.active .ic{transform:scale(1.25) rotate(-8deg)}
+.logo{background-size:200% 200%;animation:shimmer 4s linear infinite,glow 3s ease-in-out infinite}
+
+/* buttons, inputs, cards */
+.btn{position:relative;overflow:hidden;transition:transform .18s var(--ease),filter .18s,box-shadow .2s}
+.btn:hover{box-shadow:0 6px 16px rgba(0,0,0,.28)}
+.btn:active{transform:scale(.95)!important;filter:brightness(.95)}
+.btn.gold::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-120%);pointer-events:none}
+.btn.gold:hover::after{animation:sheen .8s ease}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);transform:scale(0);animation:ripple .6s ease-out forwards;pointer-events:none}
+input,select,textarea{transition:border-color .2s,box-shadow .25s,background .2s}
+.card{transition:border-color .3s,transform .25s var(--ease),box-shadow .3s}
+.card:hover{border-color:rgba(212,175,55,.35)}
+.stat{transition:transform .25s var(--ease),box-shadow .25s}
+.stat:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.stat::before{transition:width .25s var(--ease)}
+.stat:hover::before{width:6px}
+.stats .stat{animation:statin .55s var(--ease) both}
+.stats .stat:nth-child(2){animation-delay:.07s}.stats .stat:nth-child(3){animation-delay:.14s}
+.stats .stat:nth-child(4){animation-delay:.21s}.stats .stat:nth-child(5){animation-delay:.28s}
+.stats .stat:nth-child(6){animation-delay:.35s}
+#hStats .stat{animation:none}
+.chip{transition:background .2s,color .2s,transform .2s var(--spring),border-color .2s}
+.chip:hover{transform:translateY(-2px)}
+.chip:active{transform:scale(.92)}
+.chip.active{animation:popIn .3s var(--spring)}
+
+/* product cards */
+.pcard{animation:popIn .35s var(--ease) both;animation-delay:calc(var(--i,0)*18ms)}
+.pcard:hover{box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.pcard:active{transform:scale(.94)}
+.pgrid.still .pcard{animation:none}
+
+/* tables */
+#pbody tr,#cbody tr,#hBody tr{animation:fadein .35s both}
+#pbody tr:nth-child(2),#cbody tr:nth-child(2),#hBody tr:nth-child(2){animation-delay:.03s}
+#pbody tr:nth-child(3),#cbody tr:nth-child(3),#hBody tr:nth-child(3){animation-delay:.06s}
+#pbody tr:nth-child(4),#cbody tr:nth-child(4),#hBody tr:nth-child(4){animation-delay:.09s}
+#pbody tr:nth-child(5),#cbody tr:nth-child(5),#hBody tr:nth-child(5){animation-delay:.12s}
+#pbody tr:nth-child(n+6),#cbody tr:nth-child(n+6),#hBody tr:nth-child(n+6){animation-delay:.15s}
+#cartBody tr.rowin{animation:rowIn .55s var(--ease) both}
+#cartBody tr.rowflash{animation:rowFlash .7s ease-out both}
+.qty b{display:inline-block;min-width:18px;text-align:center}
+.qty b.bump{animation:bump .35s var(--spring)}
+.qty button{transition:transform .15s var(--spring),background .2s}
+.qty button:hover{background:var(--gold);color:#111}
+.qty button:active{transform:scale(.8)}
+.totals .pop{animation:bump .35s var(--spring)}
+
+/* charts */
+.bar i{transform-origin:bottom;animation:grow .8s var(--ease) both}
+.bar:nth-child(2) i{animation-delay:.06s}.bar:nth-child(3) i{animation-delay:.12s}.bar:nth-child(4) i{animation-delay:.18s}
+.bar:nth-child(5) i{animation-delay:.24s}.bar:nth-child(6) i{animation-delay:.3s}.bar:nth-child(7) i{animation-delay:.36s}
+.bar i:hover{filter:brightness(1.15)}
+.hbar i{transform-origin:left;animation:growX .9s var(--ease) both .2s}
+
+/* badges, banner, empty states */
+.badge.red{animation:pulseRed 2.4s ease-in-out infinite}
+.banner{animation:rise .5s var(--ease) both,glow 3s ease-in-out 1s 3}
+.empty{animation:fadein .6s both}
+
+/* modals */
+.overlay{animation:fadein .2s ease both}
+.overlay.out{animation:fadeOut .16s ease both}
+.modal{animation:popIn .32s var(--spring) both}
+.overlay.out .modal{animation:popOut .16s ease both}
+
+/* toasts */
+.toast{position:relative;overflow:hidden;animation:toastIn .4s var(--spring) both}
+.toast.out{animation:toastOut .25s ease both}
+.toast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--gold);transform-origin:left;animation:toastBar 3.2s linear forwards}
+.toast.err::after{background:var(--red)} .toast.ok::after{background:var(--green)}
+
+/* lock screen */
+.lock{animation:fadein .3s both}
+.lock .box{animation:popIn .5s var(--spring) both}
+.lock .logo{animation:shimmer 4s linear infinite,floaty 3s ease-in-out infinite}
+.shake{animation:shake .4s ease}
+
+/* sale-complete celebration */
+.celebrate{position:fixed;inset:0;display:grid;place-items:center;z-index:250;pointer-events:none;animation:fadein .15s both}
+.celebrate .ring{width:120px;height:120px;border-radius:50%;background:rgba(34,165,89,.16);border:3px solid var(--green);display:grid;place-items:center;animation:ringPop .45s var(--spring) both;box-shadow:0 0 60px rgba(34,165,89,.45)}
+.celebrate svg{width:64px;height:64px}
+.celebrate path{fill:none;stroke:var(--green);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .45s .25s ease forwards}
+.celebrate.out{animation:fadeOut .3s both}
+
+/* smooth light/dark switch (class is added only while toggling) */
+html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:background-color .4s,color .4s,border-color .4s,box-shadow .4s!important}
+html{scroll-behavior:smooth}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <aside class="side">
+    <div class="brand"><div class="logo"><img src="https://lh3.googleusercontent.com/ogw/AF2bZygls7McboOddO1Pcsh0vN3VKGvhbMJBYuf0FV2RcL0i4A=s32-c-mo" alt="Q"></div><div><b id="brandName">Q Scents</b><span>Point of Sale</span></div></div>
+    <button class="nav active" data-v="dashboard"><span class="ic">📈</span>Dashboard</button>
+    <button class="nav" data-v="sale"><span class="ic">🛒</span>New Sale</button>
+    <button class="nav" data-v="products"><span class="ic">🧴</span>Products</button>
+    <button class="nav" data-v="customers"><span class="ic">👥</span>Customers</button>
+    <button class="nav" data-v="history"><span class="ic">🧾</span>Sales</button>
+    <button class="nav" data-v="expenses"><span class="ic">💸</span>Expenses</button>
+    <button class="nav" data-v="settings"><span class="ic">⚙️</span>Settings</button>
+    <div class="grow"></div>
+    <button class="nav hide-m" id="themeBtn"><span class="ic">🌗</span>Toggle theme</button>
+    <button class="nav hide-m" id="lockBtn"><span class="ic">🔒</span>Lock</button>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<div id="printArea"></div>
+<div class="toast-box" id="toasts"></div>
+<div id="modalRoot"></div>
+<div id="lockRoot"></div>
+
+<script>
+/* =====================================================================
+   STORAGE  –  localStorage (primary) + IndexedDB mirror + daily snapshots
+   Old keys (qs_products, qs_sales, qs_nextNo) are migrated automatically.
+   ===================================================================== */
+const KEY = "qs_v2";
+const DEFAULT_SETTINGS = {
+  shopName: "Q Scents", tagline: "Premium Perfumes & Attars",
+  address: "Qureshi Center New Azam Market, Lahore",
+  phone: "+92 326 0017756 | +92 329 1017756",
+  footer: "Thank you for shopping at Q Scents!\nExchange within 3 days with receipt",
+  taxPct: 0, lowStock: 5, paper: "80", pin: "", theme: "dark", lastBackup: 0
+};
+let S = { products: [], sales: [], expenses: [], held: [], nextNo: 1001, settings: { ...DEFAULT_SETTINGS }, lastSnap: "" };
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const money = n => "Rs " + (Math.round((+n || 0) * 100) / 100).toLocaleString("en-PK");
+const dayKey = d => { const x = new Date(d); return x.getFullYear() + "-" + String(x.getMonth()+1).padStart(2,"0") + "-" + String(x.getDate()).padStart(2,"0"); };
+const fmtDate = t => new Date(t).toLocaleString("en-GB", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" });
+
+function normalize(d) {
+  const o = { ...S, ...d, settings: { ...DEFAULT_SETTINGS, ...(d.settings || {}) } };
+  o.products = (d.products || []).map(p => ({ id: p.id || uid(), name: p.name, category: p.category || "General", sku: p.sku || "", cost: num(p.cost), price: num(p.price), stock: p.stock === undefined ? null : p.stock, min: p.min ?? null }));
+  o.sales = (d.sales || []).map(s => ({
+    ...s, phone: s.phone || "", method: s.method || "Cash", tax: s.tax || 0, taxPct: s.taxPct || 0, discount: s.discount || 0,
+    items: (s.items || []).map(c => ({ ...c, cost: num(c.cost) })),
+    payments: s.payments || [{ ts: s.ts, amt: s.paid, method: s.method || "Cash" }]
+  }));
+  o.expenses = d.expenses || []; o.held = d.held || []; o.nextNo = d.nextNo || 1001;
+  return o;
+}
+
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { S = normalize(JSON.parse(raw)); return true; }
+    // migrate from the old single-file version
+    const g = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+    const op = g("qs_products", null), os = g("qs_sales", null);
+    if (op || os) {
+      S = normalize({ products: op || [], sales: os || [], nextNo: g("qs_nextNo", 1001), settings: { paper: g("qs_paper", "80") } });
+      localStorage.setItem(KEY, JSON.stringify(S));
+      return "migrated";
+    }
+  } catch (e) { console.error(e); }
+  return false;
+}
+
+/* IndexedDB helpers */
+let _db;
+function idb() {
+  if (_db) return _db;
+  _db = new Promise((res, rej) => {
+    const r = indexedDB.open("qscents-pos", 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore("kv"); r.result.createObjectStore("snaps"); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  return _db;
+}
+async function idbPut(store, key, val) { try { const db = await idb(); db.transaction(store, "readwrite").objectStore(store).put(val, key); } catch {} }
+async function idbGet(store, key) { try { const db = await idb(); return await new Promise(r => { const q = db.transaction(store).objectStore(store).get(key); q.onsuccess = () => r(q.result); q.onerror = () => r(null); }); } catch { return null; } }
+async function idbAll(store) { try { const db = await idb(); return await new Promise(r => { const q = db.transaction(store).objectStore(store).getAllKeys(); q.onsuccess = () => r(q.result); q.onerror = () => r([]); }); } catch { return []; } }
+async function idbDel(store, key) { try { const db = await idb(); db.transaction(store, "readwrite").objectStore(store).delete(key); } catch {} }
+
+let mirrorTimer;
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch { toast("Storage full or blocked! Export a backup now.", "err"); }
+  clearTimeout(mirrorTimer);
+  mirrorTimer = setTimeout(async () => {
+    await idbPut("kv", "state", JSON.stringify(S));
+    const today = dayKey(Date.now());
+    if (S.lastSnap !== today) {          // one automatic snapshot per day, keep the last 14
+      S.lastSnap = today; localStorage.setItem(KEY, JSON.stringify(S));
+      await idbPut("snaps", today, JSON.stringify(S));
+      const keys = (await idbAll("snaps")).sort();
+      for (const k of keys.slice(0, Math.max(0, keys.length - 14))) await idbDel("snaps", k);
+    }
+  }, 400);
+}
+
+/* =====================================================================
+   UI HELPERS
+   ===================================================================== */
+function toast(msg, type = "") {
+  const t = document.createElement("div"); t.className = "toast " + type; t.textContent = msg;
+  $("toasts").appendChild(t);
+  setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 260); }, 3000);
+}
+function modal(html, onMount) {
+  const o = document.createElement("div"); o.className = "overlay";
+  o.innerHTML = `<div class="modal">${html}</div>`;
+  const rm = o.remove.bind(o);                       // animated close for every caller of o.remove()
+  o.remove = () => { if (o._closing) return; o._closing = true; o.classList.add("out"); setTimeout(rm, 170); };
+  o.addEventListener("mousedown", e => { if (e.target === o) o.remove(); });
+  $("modalRoot").appendChild(o);
+  onMount && onMount(o);
+  return o;
+}
+function confirmBox(msg, okText = "Confirm", cls = "red") {
+  return new Promise(res => {
+    const o = modal(`<h3>Please confirm</h3><p>${esc(msg)}</p>
+      <div class="actions"><button class="btn ghost" id="cn">Cancel</button><button class="btn ${cls}" id="cy">${esc(okText)}</button></div>`);
+    o.querySelector("#cn").onclick = () => { o.remove(); res(false); };
+    o.querySelector("#cy").onclick = () => { o.remove(); res(true); };
+  });
+}
+function formBox(title, fields, okText = "Save") {
+  return new Promise(res => {
+    const o = modal(`<h3>${esc(title)}</h3>
+      ${fields.map(f => `<div style="margin-bottom:10px"><label>${esc(f.label)}</label>
+        ${f.type === "select" ? `<select data-k="${f.key}">${f.options.map(x => `<option>${esc(x)}</option>`).join("")}</select>`
+        : `<input data-k="${f.key}" type="${f.type || "text"}" step="any" value="${esc(f.value ?? "")}" placeholder="${esc(f.ph || "")}">`}</div>`).join("")}
+      <div class="actions"><button class="btn ghost" id="fc">Cancel</button><button class="btn gold" id="fo">${esc(okText)}</button></div>`);
+    const first = o.querySelector("input,select"); first && first.focus();
+    const done = ok => { const v = {}; o.querySelectorAll("[data-k]").forEach(i => v[i.dataset.k] = i.value); o.remove(); res(ok ? v : null); };
+    o.querySelector("#fc").onclick = () => done(false);
+    o.querySelector("#fo").onclick = () => done(true);
+    o.addEventListener("keydown", e => { if (e.key === "Enter") done(true); if (e.key === "Escape") done(false); });
+  });
+}
+function download(name, text, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
+}
+const hashPin = p => { let h = 5381; for (const c of "qs|" + p) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return String(h); };
+
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+let view = "dashboard";
+document.querySelectorAll(".nav[data-v]").forEach(b => b.onclick = () => go(b.dataset.v));
+function go(v) {
+  view = v;
+  document.querySelectorAll(".nav[data-v]").forEach(b => b.classList.toggle("active", b.dataset.v === v));
+  ({ dashboard: vDashboard, sale: vSale, products: vProducts, customers: vCustomers, history: vHistory, expenses: vExpenses, settings: vSettings })[v]();
+  window.scrollTo(0, 0);
+}
+const head = (t, sub, right = "") => `<div class="topbar"><div><h1>${t}</h1><small>${sub}</small></div><div class="row" style="flex:0 0 auto">${right}</div></div>`;
+
+/* =====================================================================
+   CALCULATIONS
+   ===================================================================== */
+const saleCost = s => s.items.reduce((a, c) => a + num(c.cost) * c.qty, 0);
+const saleProfit = s => s.net - s.tax - saleCost(s);
+const lowStockList = () => S.products.filter(p => p.stock !== null && p.stock <= (p.min ?? S.settings.lowStock));
+
+function salesIn(from, to) { return S.sales.filter(s => { const d = dayKey(s.ts); return (!from || d >= from) && (!to || d <= to); }); }
+function summary(list, from, to) {
+  const revenue = list.reduce((a, s) => a + s.net, 0);
+  const collected = list.reduce((a, s) => a + s.paid, 0);
+  const due = list.reduce((a, s) => a + Math.max(0, s.balance), 0);
+  const profit = list.reduce((a, s) => a + saleProfit(s), 0);
+  const exp = S.expenses.filter(e => (!from || e.date >= from) && (!to || e.date <= to)).reduce((a, e) => a + e.amount, 0);
+  const items = list.reduce((a, s) => a + s.items.reduce((x, c) => x + c.qty, 0), 0);
+  return { revenue, collected, due, profit, exp, net: profit - exp, items, count: list.length };
+}
+
+/* =====================================================================
+   DASHBOARD
+   ===================================================================== */
+function vDashboard() {
+  const today = dayKey(Date.now());
+  const t = summary(salesIn(today, today), today, today);
+  const m0 = today.slice(0, 8) + "01";
+  const m = summary(salesIn(m0, today), m0, today);
+  const lows = lowStockList();
+  const allDue = S.sales.reduce((a, s) => a + Math.max(0, s.balance), 0);
+
+  const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d; });
+  const vals = days.map(d => { const k = dayKey(d); return { k, label: d.toLocaleDateString("en-GB", { weekday: "short" }), v: salesIn(k, k).reduce((a, s) => a + s.net, 0) }; });
+  const mx = Math.max(1, ...vals.map(x => x.v));
+
+  const tally = {}; salesIn(m0, today).forEach(s => s.items.forEach(c => tally[c.product] = (tally[c.product] || 0) + c.qty));
+  const top = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const tmx = Math.max(1, ...top.map(x => x[1]));
+  const byM = {}; salesIn(m0, today).forEach(s => byM[s.method] = (byM[s.method] || 0) + s.net);
+  const recent = [...S.sales].sort((a, b) => b.ts - a.ts).slice(0, 6);
+
+  const backupOld = S.sales.length && (Date.now() - S.settings.lastBackup > 7 * 864e5);
+
+  $("main").innerHTML = head("Dashboard", new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }),
+    `<button class="btn gold" onclick="go('sale')">＋ New Sale</button>`) +
+    (backupOld ? `<div class="banner"><span>⚠️ You haven't downloaded a backup in over a week.</span><button class="btn amber sm" onclick="backupNow()">Backup now</button></div>` : "") +
+    `<div class="stats">
+      <div class="stat"><span>Today's Sales</span><b>${money(t.revenue)}</b><em>${t.count} receipts · ${t.items} items</em></div>
+      <div class="stat"><span>Today's Profit</span><b class="${t.profit >= 0 ? "pos" : "neg"}">${money(t.profit)}</b><em>before expenses</em></div>
+      <div class="stat"><span>This Month</span><b>${money(m.revenue)}</b><em>Net profit ${money(m.net)}</em></div>
+      <div class="stat"><span>Outstanding Dues</span><b class="${allDue ? "neg" : ""}">${money(allDue)}</b><em>all customers</em></div>
+      <div class="stat"><span>Low Stock</span><b class="${lows.length ? "neg" : ""}">${lows.length}</b><em>products to reorder</em></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Last 7 days</h3>
+        <div class="bars">${vals.map(x => `<div class="bar"><em>${x.v ? Math.round(x.v).toLocaleString("en-PK") : ""}</em><i style="height:${Math.max(2, x.v / mx * 100)}%"></i><small>${x.label}</small></div>`).join("")}</div></div>
+      <div class="card"><h3>Top products this month</h3>
+        ${top.length ? top.map(([n, q]) => `<div class="hbar"><div><span>${esc(n)}</span><b>${q}</b></div><i style="width:${q / tmx * 100}%"></i></div>`).join("") : `<div class="empty">No sales yet this month</div>`}</div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Recent sales</h3><div class="tablewrap"><table>
+        <thead><tr><th>#</th><th>Customer</th><th>Date</th><th class="r">Net</th></tr></thead>
+        <tbody>${recent.length ? recent.map(s => `<tr><td>${s.no}</td><td>${esc(s.customer)}</td><td>${fmtDate(s.ts)}</td><td class="r">${money(s.net)}</td></tr>`).join("") : `<tr><td colspan="4" class="empty">No sales recorded</td></tr>`}</tbody></table></div></div>
+      <div>
+        <div class="card"><h3>Low stock alerts</h3>
+          ${lows.length ? lows.slice(0, 6).map(p => `<div class="row" style="justify-content:space-between;margin:6px 0;flex-wrap:nowrap"><span>${esc(p.name)}</span><span class="badge red">${p.stock} left</span></div>`).join("") : `<div class="hint">All stocked up ✔</div>`}</div>
+        <div class="card"><h3>Payment methods (month)</h3>
+          ${Object.keys(byM).length ? Object.entries(byM).map(([k, v]) => `<div class="row" style="justify-content:space-between;margin:6px 0;flex-wrap:nowrap"><span>${esc(k)}</span><b>${money(v)}</b></div>`).join("") : `<div class="hint">—</div>`}</div>
+      </div>
+    </div>`;
+}
+
+/* =====================================================================
+   NEW SALE
+   ===================================================================== */
+let cart = [];
+let cat = "All";
+let sForm = { customer: "", phone: "", discount: "", discType: "amt", taxPct: null, method: "Cash", paid: "" };
+
+function vSale() {
+  refresh._prev = [];
+  if (sForm.taxPct === null) sForm.taxPct = S.settings.taxPct;
+  const cats = ["All", ...new Set(S.products.map(p => p.category))];
+  const custs = customerList();
+  $("main").innerHTML = head("New Sale", "Tap a product or search by name / SKU", `
+      <button class="btn ghost" id="holdBtn">⏸ Hold</button>
+      <button class="btn ghost" id="heldBtn">Held (${S.held.length})</button>`) + `
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="row">
+            <div style="flex:2 1 180px"><label>Customer</label><input id="customer" list="custList" placeholder="Walk-in Customer" value="${esc(sForm.customer)}"></div>
+            <div><label>Phone</label><input id="phone" placeholder="03xx xxxxxxx" value="${esc(sForm.phone)}"></div>
+          </div>
+          <datalist id="custList">${custs.map(c => `<option value="${esc(c.name)}">${esc(c.phone)}</option>`).join("")}</datalist>
+          <div id="custNote" class="hint" style="margin-top:6px"></div>
+        </div>
+        <div class="card">
+          <div class="row">
+            <div style="flex:3 1 200px"><label>Search / scan SKU</label><input id="search" placeholder="Type to filter, Enter to add…" autocomplete="off"></div>
+            <div style="flex:0 0 auto"><button class="btn ghost" id="customItem">＋ Custom item</button></div>
+          </div>
+          <div class="chips" id="chips">${cats.map(c => `<span class="chip ${c === cat ? "active" : ""}" data-c="${esc(c)}">${esc(c)}</span>`).join("")}</div>
+          <div class="pgrid" id="pgrid"></div>
+        </div>
+        <div class="card">
+          <h3>Cart</h3>
+          <div class="tablewrap"><table><thead><tr><th>#</th><th>Product</th><th class="r">Price</th><th class="c">Qty</th><th class="r">Amount</th><th></th></tr></thead><tbody id="cartBody"></tbody></table></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="row">
+            <div><label>Discount</label><div class="row" style="flex-wrap:nowrap;gap:4px"><input id="discount" type="number" min="0" step="any" value="${esc(sForm.discount)}" placeholder="0"><select id="discType" style="width:72px"><option value="amt" ${sForm.discType==="amt"?"selected":""}>Rs</option><option value="pct" ${sForm.discType==="pct"?"selected":""}>%</option></select></div></div>
+            <div><label>Tax / GST %</label><input id="taxPct" type="number" min="0" step="any" value="${sForm.taxPct}"></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div><label>Payment</label><select id="payment">${["Cash","Card","JazzCash","Easypaisa","Bank Transfer"].map(m => `<option ${m===sForm.method?"selected":""}>${m}</option>`).join("")}</select></div>
+            <div><label>Received (Rs)</label><input id="paid" type="number" min="0" step="any" placeholder="Empty = full" value="${esc(sForm.paid)}"></div>
+          </div>
+        </div>
+        <div class="card totals">
+          <p><span>Subtotal</span><span id="tSub"></span></p>
+          <p><span>Discount</span><span id="tDisc"></span></p>
+          <p><span>Tax</span><span id="tTax"></span></p>
+          <p class="net"><span>Net Total</span><span id="tNet"></span></p>
+          <p><span>Received</span><span id="tPaid"></span></p>
+          <p><span id="tBalLabel">Change</span><span id="tBal"></span></p>
+          <div class="row" style="margin-top:12px">
+            <button class="btn gold lg" id="completeBtn" style="flex:2 1 160px">✔ Complete &amp; Print</button>
+            <button class="btn green lg" id="waBtn" style="flex:1 1 90px">WhatsApp</button>
+            <button class="btn ghost lg" id="clearBtn" style="flex:1 1 70px">Clear</button>
+          </div>
+          <div class="hint" style="margin-top:8px">Shortcut: Ctrl + Enter to complete</div>
+        </div>
+        <div class="card"><h3>Live receipt preview</h3><div id="receipt"></div></div>
+      </div>
+    </div>`;
+
+  $("chips").onclick = e => { const c = e.target.dataset.c; if (c) { cat = c; document.querySelectorAll(".chip").forEach(x => x.classList.toggle("active", x.dataset.c === c)); renderGrid(true); } };
+  $("search").oninput = () => renderGrid(false);
+  $("search").onkeydown = e => {
+    if (e.key !== "Enter") return;
+    const q = $("search").value.trim().toLowerCase(); if (!q) return;
+    const exact = S.products.find(p => p.sku && p.sku.toLowerCase() === q);
+    const hit = exact || filteredProducts()[0];
+    if (hit) { addProduct(hit.id); $("search").value = ""; renderGrid(); }
+  };
+  $("customItem").onclick = async () => {
+    const v = await formBox("Custom item", [{ key: "n", label: "Item name" }, { key: "p", label: "Price (Rs)", type: "number" }, { key: "q", label: "Quantity", type: "number", value: 1 }], "Add");
+    if (!v) return;
+    if (!v.n.trim() || num(v.p) < 0 || v.p === "" || num(v.q) < 1) return toast("Enter name, price and quantity", "err");
+    cart.push({ pid: null, product: v.n.trim(), price: num(v.p), cost: 0, qty: Math.floor(num(v.q)) }); refresh();
+  };
+  ["customer", "phone", "discount", "discType", "taxPct", "payment", "paid"].forEach(id => {
+    const el = $(id); const h = () => { readForm(); refresh(); };
+    el.addEventListener("input", h); el.addEventListener("change", h);
+  });
+  $("customer").addEventListener("change", () => {
+    const c = custs.find(x => x.name.toLowerCase() === $("customer").value.trim().toLowerCase());
+    if (c && !$("phone").value) { $("phone").value = c.phone; readForm(); }
+    refresh();
+  });
+  $("completeBtn").onclick = completeSale;
+  $("clearBtn").onclick = async () => { if (!cart.length || await confirmBox("Clear this sale?", "Clear")) resetSale(); };
+  $("waBtn").onclick = sendWA;
+  $("holdBtn").onclick = holdSale;
+  $("heldBtn").onclick = showHeld;
+  renderGrid(); refresh();
+}
+function readForm() {
+  sForm = { customer: $("customer").value, phone: $("phone").value, discount: $("discount").value, discType: $("discType").value, taxPct: $("taxPct").value, method: $("payment").value, paid: $("paid").value };
+}
+function filteredProducts() {
+  const q = ($("search")?.value || "").trim().toLowerCase();
+  return S.products.filter(p => (cat === "All" || p.category === cat) && (!q || p.name.toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q)));
+}
+function renderGrid(animate = true) {
+  const list = filteredProducts();
+  $("pgrid").classList.toggle("still", animate === false);   // no replay while typing in the search box
+  $("pgrid").innerHTML = list.length ? list.map((p, idx) => {
+    const out = p.stock !== null && p.stock <= 0;
+    return `<div class="pcard ${out ? "out" : ""}" style="--i:${Math.min(idx, 14)}" onclick="addProduct('${p.id}')"><b>${esc(p.name)}</b><span>${money(p.price)}</span><small>${p.stock === null ? esc(p.category) : out ? "Out of stock" : p.stock + " in stock"}</small></div>`;
+  }).join("") : `<div class="empty" style="grid-column:1/-1">${S.products.length ? "No match" : "No products yet — add some in the Products tab, or use Custom item."}</div>`;
+}
+function addProduct(id) {
+  const p = S.products.find(x => x.id === id); if (!p) return;
+  const have = cart.filter(c => c.pid === id).reduce((a, c) => a + c.qty, 0);
+  if (p.stock !== null && have + 1 > p.stock) toast(`Only ${p.stock} in stock for ${p.name}`, "err");
+  const same = cart.find(c => c.pid === id && c.price === p.price);
+  if (same) same.qty++; else cart.push({ pid: id, product: p.name, price: p.price, cost: p.cost, qty: 1 });
+  refresh();
+}
+function changeQty(i, d) { cart[i].qty += d; if (cart[i].qty < 1) cart.splice(i, 1); refresh(); }
+function removeItem(i) { cart.splice(i, 1); refresh(); }
+function setPrice(i) {
+  formBox("Edit price", [{ key: "p", label: "Unit price (Rs)", type: "number", value: cart[i].price }]).then(v => { if (v && v.p !== "" && num(v.p) >= 0) { cart[i].price = num(v.p); refresh(); } });
+}
+
+function calc() {
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const dv = Math.max(0, num($("discount")?.value));
+  const discount = ($("discType")?.value === "pct") ? subtotal * Math.min(dv, 100) / 100 : Math.min(dv, subtotal);
+  const taxPct = Math.max(0, num($("taxPct")?.value));
+  const tax = (subtotal - discount) * taxPct / 100;
+  const net = subtotal - discount + tax;
+  const raw = ($("paid")?.value || "").trim();
+  const paid = raw === "" ? net : Math.max(0, num(raw));
+  return { subtotal, discount, tax, taxPct, net, paid, balance: net - paid };
+}
+function draftSale() {
+  const t = calc();
+  return { no: S.nextNo, ts: Date.now(), customer: ($("customer").value.trim()) || "Walk-in Customer", phone: $("phone").value.trim(),
+    method: $("payment").value, items: cart.map(c => ({ ...c })), ...t };
+}
+function refresh() {
+  if (view !== "sale") return;
+  const pv = refresh._prev || [];
+  const rc = i => i >= pv.length ? "rowin" : (pv[i] !== cart[i].qty ? "rowflash" : "");
+  const bc = i => (i < pv.length && pv[i] !== cart[i].qty) ? "bump" : "";
+  $("cartBody").innerHTML = cart.length ? cart.map((c, i) => `<tr class="${rc(i)}">
+    <td>${i + 1}</td><td>${esc(c.product)}</td>
+    <td class="r"><a href="#" onclick="setPrice(${i});return false" style="color:inherit;border-bottom:1px dotted var(--muted)">${money(c.price)}</a></td>
+    <td class="c"><span class="qty"><button onclick="changeQty(${i},-1)">−</button><b class="${bc(i)}">${c.qty}</b><button onclick="changeQty(${i},1)">+</button></span></td>
+    <td class="r">${money(c.price * c.qty)}</td>
+    <td class="r"><button class="btn red sm" onclick="removeItem(${i})">✕</button></td></tr>`).join("")
+    : `<tr><td colspan="6" class="empty">Cart is empty</td></tr>`;
+  refresh._prev = cart.map(c => c.qty);
+  const t = calc();
+  setAmt("tSub", t.subtotal); setAmt("tDisc", t.discount, "− "); setAmt("tTax", t.tax);
+  setAmt("tNet", t.net); setAmt("tPaid", t.paid);
+  $("tBalLabel").textContent = t.balance > 0 ? "Balance Due" : "Change";
+  setAmt("tBal", Math.abs(t.balance));
+  $("tBal").style.color = t.balance > 0 ? "var(--red)" : "var(--green)";
+  const nm = $("customer").value.trim().toLowerCase();
+  const c = nm && customerList().find(x => x.name.toLowerCase() === nm);
+  $("custNote").innerHTML = c ? `Returning customer · ${c.visits} visits · spent ${money(c.spent)}${c.due > 0 ? ` · <b class="neg">owes ${money(c.due)}</b>` : ""}` : "";
+  $("receipt").innerHTML = receiptHTML(draftSale());
+}
+
+function receiptHTML(s) {
+  const st = S.settings;
+  return `<div class="rc">
+    <h2>${esc(st.shopName)}</h2>
+    ${st.tagline ? `<p class="t">${esc(st.tagline)}</p>` : ""}
+    <p class="t">${esc(st.address)}</p><p class="t">${esc(st.phone)}</p>
+    <hr>
+    <div class="l"><span>Receipt #</span><b>${esc(s.no)}</b></div>
+    <div class="l"><span>Date</span><span>${esc(fmtDate(s.ts))}</span></div>
+    <div class="l"><span>Customer</span><span>${esc(s.customer)}</span></div>
+    ${s.phone ? `<div class="l"><span>Phone</span><span>${esc(s.phone)}</span></div>` : ""}
+    <div class="l"><span>Payment</span><span>${esc(s.method)}</span></div>
+    <hr>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr><th>Sr</th><th style="text-align:left">Item</th><th>Price</th><th>Qty</th><th style="text-align:right">Amt</th></tr></thead>
+      <tbody>${s.items.map((c, i) => `<tr><td>${i + 1}</td><td style="text-align:left">${esc(c.product)}</td><td style="text-align:center">${c.price}</td><td style="text-align:center">${c.qty}</td><td style="text-align:right">${(c.price * c.qty).toLocaleString("en-PK")}</td></tr>`).join("")}</tbody>
+    </table><hr>
+    <div class="l"><span>Subtotal</span><span>${money(s.subtotal)}</span></div>
+    ${s.discount > 0 ? `<div class="l"><span>Discount</span><span>- ${money(s.discount)}</span></div>` : ""}
+    ${s.tax > 0 ? `<div class="l"><span>Tax (${s.taxPct}%)</span><span>${money(s.tax)}</span></div>` : ""}
+    <div class="l big"><span>NET TOTAL</span><span>${money(s.net)}</span></div>
+    <div class="l"><span>Received</span><span>${money(s.paid)}</span></div>
+    <div class="l"><span>${s.balance > 0 ? "Balance Due" : "Change"}</span><span>${money(Math.abs(s.balance))}</span></div>
+    <hr>
+    ${String(st.footer || "").split("\n").map(l => `<p class="t">${esc(l)}</p>`).join("")}
+  </div>`;
+}
+function printReceipt(s) {
+  applyPaper();
+  $("printArea").innerHTML = receiptHTML(s);
+  setTimeout(() => window.print(), 120);
+}
+function applyPaper() {
+  const a4 = S.settings.paper === "a4";
+  $("pageStyle").textContent = a4 ? "@page { size: A4; margin: 12mm; }" : "@page { size: 80mm auto; margin: 3mm; }";
+  $("printArea").style.maxWidth = a4 ? "none" : "80mm";
+}
+
+async function completeSale() {
+  if (!cart.length) return toast("Cart is empty", "err");
+  const s = draftSale();
+  if (s.balance > 0) {
+    if (!s.phone && s.customer === "Walk-in Customer") return toast("Enter customer name/phone to record a due balance", "err");
+    if (!await confirmBox(`Customer still owes ${money(s.balance)}. Save as part-payment?`, "Save", "gold")) return;
+  }
+  s.payments = [{ ts: s.ts, amt: s.paid, method: s.method }];
+  s.items.forEach(c => { const p = S.products.find(x => x.id === c.pid); if (p && p.stock !== null) p.stock = Math.max(0, p.stock - c.qty); });
+  S.sales.push(s); S.nextNo++; save();
+  toast(`Sale #${s.no} saved`, "ok");
+  celebrate();
+  setTimeout(() => printReceipt(s), 350);   // let the checkmark play before the print dialog opens
+  resetSale();
+}
+function resetSale() {
+  cart = []; sForm = { customer: "", phone: "", discount: "", discType: "amt", taxPct: null, method: "Cash", paid: "" };
+  vSale();
+}
+function sendWA() {
+  if (!cart.length) return toast("Cart is empty", "err");
+  const s = draftSale();
+  let n = s.phone.replace(/\D/g, ""); if (n.startsWith("0")) n = "92" + n.slice(1);
+  const txt = [`*${S.settings.shopName}*`, "Receipt #" + s.no, fmtDate(s.ts), "Customer: " + s.customer, "",
+    ...s.items.map(c => `${c.product} x${c.qty} = ${money(c.price * c.qty)}`), "",
+    s.discount > 0 ? "Discount: -" + money(s.discount) : null, s.tax > 0 ? "Tax: " + money(s.tax) : null,
+    `*Net Total: ${money(s.net)}*`, s.balance > 0 ? "Balance Due: " + money(s.balance) : null, "", String(S.settings.footer).split("\n")[0]].filter(x => x !== null).join("\n");
+  window.open(`https://wa.me/${n}?text=${encodeURIComponent(txt)}`, "_blank");
+}
+function holdSale() {
+  if (!cart.length) return toast("Cart is empty", "err");
+  readForm(); S.held.push({ id: uid(), ts: Date.now(), cart: cart.map(c => ({ ...c })), form: { ...sForm } }); save();
+  toast("Sale put on hold"); resetSale();
+}
+function showHeld() {
+  if (!S.held.length) return toast("No held sales");
+  const o = modal(`<h3>Held sales</h3>${S.held.map(h => `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin:8px 0;padding:8px;background:var(--panel2);border-radius:8px">
+    <div><b>${esc(h.form.customer || "Walk-in")}</b><br><small class="hint">${h.cart.length} items · ${money(h.cart.reduce((a, c) => a + c.price * c.qty, 0))} · ${fmtDate(h.ts)}</small></div>
+    <div style="flex:0 0 auto"><button class="btn green sm" data-r="${h.id}">Recall</button> <button class="btn red sm" data-d="${h.id}">✕</button></div></div>`).join("")}
+    <div class="actions"><button class="btn ghost" id="hc">Close</button></div>`);
+  o.querySelector("#hc").onclick = () => o.remove();
+  o.querySelectorAll("[data-r]").forEach(b => b.onclick = () => {
+    const i = S.held.findIndex(x => x.id === b.dataset.r), h = S.held[i];
+    cart = h.cart; sForm = h.form; S.held.splice(i, 1); save(); o.remove(); vSale();
+  });
+  o.querySelectorAll("[data-d]").forEach(b => b.onclick = () => { S.held = S.held.filter(x => x.id !== b.dataset.d); save(); o.remove(); vSale(); });
+}
+
+/* =====================================================================
+   PRODUCTS
+   ===================================================================== */
+function vProducts() {
+  const cats = [...new Set(S.products.map(p => p.category))];
+  const stockVal = S.products.reduce((a, p) => a + (p.stock || 0) * p.cost, 0);
+  const retailVal = S.products.reduce((a, p) => a + (p.stock || 0) * p.price, 0);
+  $("main").innerHTML = head("Products", "Manage your catalogue and stock", `<button class="btn gold" id="addP">＋ Add product</button>`) + `
+    <div class="stats">
+      <div class="stat"><span>Products</span><b>${S.products.length}</b></div>
+      <div class="stat"><span>Stock value (cost)</span><b>${money(stockVal)}</b></div>
+      <div class="stat"><span>Stock value (retail)</span><b>${money(retailVal)}</b></div>
+      <div class="stat"><span>Low stock</span><b class="${lowStockList().length ? "neg" : ""}">${lowStockList().length}</b></div>
+    </div>
+    <div class="card">
+      <div class="row"><div style="flex:3 1 200px"><label>Search</label><input id="pq" placeholder="Name, SKU or category"></div>
+        <div style="flex:0 0 auto"><button class="btn ghost" id="impBtn">Import CSV</button><input type="file" id="impFile" accept=".csv" class="hidden"></div></div>
+      <div class="tablewrap"><table><thead><tr><th>Product</th><th>Category</th><th>SKU</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Margin</th><th class="c">Stock</th><th class="r">Actions</th></tr></thead><tbody id="pbody"></tbody></table></div>
+    </div>`;
+  const draw = () => {
+    const q = $("pq").value.trim().toLowerCase();
+    const list = S.products.filter(p => !q || (p.name + p.sku + p.category).toLowerCase().includes(q));
+    $("pbody").innerHTML = list.length ? list.map(p => {
+      const low = p.stock !== null && p.stock <= (p.min ?? S.settings.lowStock);
+      const mg = p.price > 0 && p.cost > 0 ? Math.round((p.price - p.cost) / p.price * 100) + "%" : "—";
+      return `<tr><td><b>${esc(p.name)}</b></td><td><span class="badge">${esc(p.category)}</span></td><td>${esc(p.sku) || "—"}</td>
+      <td class="r">${p.cost ? money(p.cost) : "—"}</td><td class="r">${money(p.price)}</td><td class="r">${mg}</td>
+      <td class="c">${p.stock === null ? "—" : `<span class="badge ${low ? "red" : "green"}">${p.stock}</span>`}</td>
+      <td class="r"><button class="btn ghost sm" onclick="restock('${p.id}')">＋Stock</button> <button class="btn blue sm" onclick="editProduct('${p.id}')">Edit</button> <button class="btn red sm" onclick="delProduct('${p.id}')">Delete</button></td></tr>`;
+    }).join("") : `<tr><td colspan="8" class="empty">No products found</td></tr>`;
+  };
+  $("pq").oninput = draw; draw();
+  $("addP").onclick = () => editProduct();
+  $("impBtn").onclick = () => $("impFile").click();
+  $("impFile").onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      let n = 0;
+      r.result.split(/\r?\n/).slice(1).forEach(line => {
+        const c = line.split(",").map(x => x.replace(/^"|"$/g, "").trim());
+        if (!c[0] || isNaN(parseFloat(c[3]))) return;
+        upsertProduct({ name: c[0], category: c[1] || "General", sku: c[2] || "", price: num(c[3]), cost: num(c[4]), stock: c[5] === "" || c[5] === undefined ? null : Math.max(0, parseInt(c[5]) || 0) }); n++;
+      });
+      save(); toast(`${n} products imported`, "ok"); vProducts();
+    };
+    r.readAsText(f); e.target.value = "";
+  };
+}
+function upsertProduct(d) {
+  const ex = S.products.find(p => p.id === d.id) || S.products.find(p => p.name.toLowerCase() === d.name.toLowerCase());
+  if (ex) Object.assign(ex, d, { id: ex.id }); else S.products.push({ id: uid(), min: null, ...d });
+  S.products.sort((a, b) => a.name.localeCompare(b.name));
+}
+async function editProduct(id) {
+  const p = S.products.find(x => x.id === id) || { name: "", category: "General", sku: "", cost: "", price: "", stock: null, min: null };
+  const v = await formBox(id ? "Edit product" : "Add product", [
+    { key: "name", label: "Product name", value: p.name }, { key: "category", label: "Category", value: p.category, ph: "e.g. Perfume, Attar, Body Spray" },
+    { key: "sku", label: "SKU / Barcode (optional)", value: p.sku },
+    { key: "price", label: "Selling price (Rs)", type: "number", value: p.price }, { key: "cost", label: "Cost price (Rs) – for profit", type: "number", value: p.cost },
+    { key: "stock", label: "Stock (blank = untracked)", type: "number", value: p.stock ?? "" },
+    { key: "min", label: "Low-stock alert at (blank = default)", type: "number", value: p.min ?? "" }]);
+  if (!v) return;
+  if (!v.name.trim() || v.price === "" || num(v.price) < 0) return toast("Enter a valid name and price", "err");
+  upsertProduct({ id: p.id, name: v.name.trim(), category: v.category.trim() || "General", sku: v.sku.trim(), price: num(v.price), cost: num(v.cost),
+    stock: v.stock === "" ? null : Math.max(0, parseInt(v.stock) || 0), min: v.min === "" ? null : parseInt(v.min) });
+  save(); toast("Product saved", "ok"); vProducts();
+}
+async function restock(id) {
+  const p = S.products.find(x => x.id === id);
+  const v = await formBox("Add stock – " + p.name, [{ key: "q", label: "Quantity received", type: "number", value: 1 }], "Add");
+  if (!v || num(v.q) <= 0) return;
+  p.stock = (p.stock || 0) + Math.floor(num(v.q)); save(); toast("Stock updated", "ok"); vProducts();
+}
+async function delProduct(id) {
+  const p = S.products.find(x => x.id === id);
+  if (await confirmBox(`Delete "${p.name}"? Past sales are not affected.`, "Delete")) { S.products = S.products.filter(x => x.id !== id); save(); vProducts(); }
+}
+
+/* =====================================================================
+   CUSTOMERS  (built from sales history – nothing extra to maintain)
+   ===================================================================== */
+function customerList() {
+  const map = {};
+  S.sales.forEach(s => {
+    if (s.customer === "Walk-in Customer" && !s.phone) return;
+    const key = (s.phone || s.customer).toLowerCase();
+    const c = map[key] || (map[key] = { name: s.customer, phone: s.phone, visits: 0, spent: 0, due: 0, last: 0 });
+    c.visits++; c.spent += s.net; c.due += Math.max(0, s.balance);
+    if (s.ts >= c.last) { c.last = s.ts; c.name = s.customer; if (s.phone) c.phone = s.phone; }
+  });
+  return Object.values(map).sort((a, b) => b.last - a.last);
+}
+function vCustomers() {
+  const list = customerList();
+  $("main").innerHTML = head("Customers", `${list.length} saved from your sales history`) + `
+    <div class="card"><div class="row"><div><label>Search</label><input id="cq" placeholder="Name or phone"></div></div>
+    <div class="tablewrap"><table><thead><tr><th>Customer</th><th>Phone</th><th class="c">Visits</th><th class="r">Total spent</th><th class="r">Due</th><th>Last visit</th><th class="r"></th></tr></thead><tbody id="cbody"></tbody></table></div></div>`;
+  const draw = () => {
+    const q = $("cq").value.trim().toLowerCase();
+    const l = list.filter(c => !q || (c.name + c.phone).toLowerCase().includes(q));
+    $("cbody").innerHTML = l.length ? l.map(c => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.phone) || "—"}</td><td class="c">${c.visits}</td><td class="r">${money(c.spent)}</td>
+      <td class="r ${c.due > 0 ? "neg" : ""}">${c.due > 0 ? money(c.due) : "—"}</td><td>${fmtDate(c.last)}</td>
+      <td class="r"><button class="btn blue sm" data-n="${esc(c.phone || c.name)}">History</button></td></tr>`).join("") : `<tr><td colspan="7" class="empty">No customers yet. Enter a name or phone on a sale and they'll appear here.</td></tr>`;
+    $("cbody").querySelectorAll("[data-n]").forEach(b => b.onclick = () => { go("history"); $("hSearch").value = b.dataset.n; drawHistory(); });
+  };
+  $("cq").oninput = draw; draw();
+}
+
+/* =====================================================================
+   SALES & REPORTS
+   ===================================================================== */
+let hf = { from: "", to: "", q: "", due: false };
+function vHistory() {
+  $("main").innerHTML = head("Sales & Reports", "Every receipt, saved permanently on this device", `
+      <button class="btn blue" id="csvBtn">Export CSV</button>`) + `
+    <div class="card"><div class="row">
+      <div><label>From</label><input type="date" id="hFrom" value="${hf.from}"></div>
+      <div><label>To</label><input type="date" id="hTo" value="${hf.to}"></div>
+      <div style="flex:2 1 180px"><label>Search receipt #, customer, phone, product</label><input id="hSearch" value="${esc(hf.q)}"></div>
+      <div style="flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn ghost" id="bToday">Today</button><button class="btn ghost" id="bMonth">This month</button><button class="btn ghost" id="bAll">All time</button>
+        <button class="btn ghost" id="bDue">Dues only</button></div>
+    </div></div>
+    <div class="stats" id="hStats"></div>
+    <div class="card"><div class="tablewrap"><table><thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Method</th><th class="r">Net</th><th class="r">Profit</th><th class="r">Due</th><th class="r">Actions</th></tr></thead><tbody id="hBody"></tbody></table></div></div>`;
+  ["hFrom", "hTo", "hSearch"].forEach(id => $(id).oninput = drawHistory);
+  $("bToday").onclick = () => { $("hFrom").value = $("hTo").value = dayKey(Date.now()); drawHistory(); };
+  $("bMonth").onclick = () => { const t = dayKey(Date.now()); $("hFrom").value = t.slice(0, 8) + "01"; $("hTo").value = t; drawHistory(); };
+  $("bAll").onclick = () => { $("hFrom").value = $("hTo").value = $("hSearch").value = ""; hf.due = false; drawHistory(); };
+  $("bDue").onclick = () => { hf.due = !hf.due; drawHistory(); };
+  $("csvBtn").onclick = exportCSV;
+  drawHistory();
+}
+function filteredSales() {
+  hf.from = $("hFrom").value; hf.to = $("hTo").value; hf.q = $("hSearch").value.trim().toLowerCase();
+  return salesIn(hf.from, hf.to).filter(s => (!hf.due || s.balance > 0) && (!hf.q || String(s.no).includes(hf.q) || s.customer.toLowerCase().includes(hf.q) || (s.phone || "").includes(hf.q) || s.items.some(c => c.product.toLowerCase().includes(hf.q)))).sort((a, b) => b.ts - a.ts);
+}
+function drawHistory() {
+  const list = filteredSales(), t = summary(list, hf.from, hf.to);
+  $("bDue").classList.toggle("gold", hf.due);
+  $("hStats").innerHTML = `
+    <div class="stat"><span>Receipts</span><b>${t.count}</b><em>${t.items} items sold</em></div>
+    <div class="stat"><span>Revenue</span><b>${money(t.revenue)}</b><em>avg ${money(t.count ? t.revenue / t.count : 0)}</em></div>
+    <div class="stat"><span>Gross profit</span><b class="${t.profit >= 0 ? "pos" : "neg"}">${money(t.profit)}</b><em>needs product cost prices</em></div>
+    <div class="stat"><span>Expenses</span><b>${money(t.exp)}</b><em>in this period</em></div>
+    <div class="stat"><span>Net profit</span><b class="${t.net >= 0 ? "pos" : "neg"}">${money(t.net)}</b></div>
+    <div class="stat"><span>Outstanding</span><b class="${t.due ? "neg" : ""}">${money(t.due)}</b></div>`;
+  $("hBody").innerHTML = list.length ? list.map(s => `<tr>
+    <td><b>#${s.no}</b></td><td>${fmtDate(s.ts)}</td><td>${esc(s.customer)}${s.phone ? `<br><small class="hint">${esc(s.phone)}</small>` : ""}</td>
+    <td><span class="badge">${esc(s.method)}</span></td><td class="r">${money(s.net)}</td><td class="r">${money(saleProfit(s))}</td>
+    <td class="r">${s.balance > 0 ? `<span class="badge red">${money(s.balance)}</span>` : `<span class="badge green">Paid</span>`}</td>
+    <td class="r"><button class="btn ghost sm" onclick="viewSale(${s.no})">View</button> <button class="btn blue sm" onclick="reprint(${s.no})">Print</button>
+    ${s.balance > 0 ? `<button class="btn green sm" onclick="settle(${s.no})">Settle</button>` : ""} <button class="btn red sm" onclick="voidSale(${s.no})">Void</button></td></tr>`).join("")
+    : `<tr><td colspan="8" class="empty">No sales found</td></tr>`;
+}
+const getSale = no => S.sales.find(x => x.no === no);
+function viewSale(no) {
+  const s = getSale(no); if (!s) return;
+  const o = modal(`<div style="max-height:62vh;overflow:auto">${receiptHTML(s)}</div>
+    ${s.payments.length > 1 ? `<h3 style="margin-top:14px">Payments</h3>${s.payments.map(p => `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin:4px 0"><span>${fmtDate(p.ts)} · ${esc(p.method)}</span><b>${money(p.amt)}</b></div>`).join("")}` : ""}
+    <div class="actions"><button class="btn ghost" id="vc">Close</button><button class="btn blue" id="vp">Print</button></div>`);
+  o.querySelector("#vc").onclick = () => o.remove(); o.querySelector("#vp").onclick = () => printReceipt(s);
+}
+function reprint(no) { const s = getSale(no); if (s) printReceipt(s); }
+async function settle(no) {
+  const s = getSale(no); if (!s) return;
+  const v = await formBox(`Settle receipt #${no} (due ${money(s.balance)})`, [{ key: "a", label: "Amount received (Rs)", type: "number", value: s.balance }, { key: "m", label: "Method", type: "select", options: ["Cash", "Card", "JazzCash", "Easypaisa", "Bank Transfer"] }], "Record payment");
+  if (!v) return; const amt = num(v.a); if (amt <= 0) return;
+  s.paid += amt; s.balance = Math.max(0, s.net - s.paid); s.payments.push({ ts: Date.now(), amt, method: v.m });
+  save(); toast("Payment recorded", "ok"); drawHistory();
+}
+async function voidSale(no) {
+  if (!await confirmBox(`Void receipt #${no}? Stock will be restored and the sale removed.`, "Void sale")) return;
+  const i = S.sales.findIndex(x => x.no === no); if (i < 0) return;
+  S.sales[i].items.forEach(c => { const p = S.products.find(x => x.id === c.pid) || S.products.find(x => x.name === c.product); if (p && p.stock !== null) p.stock += c.qty; });
+  S.sales.splice(i, 1); save(); toast("Sale voided"); drawHistory();
+}
+function exportCSV() {
+  const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  const rows = [["Receipt", "Date", "Customer", "Phone", "Method", "Items", "Subtotal", "Discount", "Tax", "Net", "Paid", "Balance", "Profit"]];
+  filteredSales().forEach(s => rows.push([s.no, fmtDate(s.ts), s.customer, s.phone, s.method, s.items.map(c => `${c.product} x${c.qty}`).join("; "), s.subtotal, s.discount, s.tax, s.net, s.paid, s.balance, saleProfit(s)]));
+  download("qscents-sales-" + dayKey(Date.now()) + ".csv", "\ufeff" + rows.map(r => r.map(q).join(",")).join("\n"), "text/csv");
+}
+
+/* =====================================================================
+   EXPENSES
+   ===================================================================== */
+function vExpenses() {
+  const today = dayKey(Date.now()), m0 = today.slice(0, 8) + "01";
+  const list = [...S.expenses].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
+  const mTotal = list.filter(e => e.date >= m0).reduce((a, e) => a + e.amount, 0);
+  const tTotal = list.filter(e => e.date === today).reduce((a, e) => a + e.amount, 0);
+  $("main").innerHTML = head("Expenses", "Track rent, bills, salaries and stock purchases") + `
+    <div class="stats"><div class="stat"><span>Today</span><b>${money(tTotal)}</b></div><div class="stat"><span>This month</span><b>${money(mTotal)}</b></div><div class="stat"><span>All time</span><b>${money(list.reduce((a, e) => a + e.amount, 0))}</b></div></div>
+    <div class="card"><div class="row">
+      <div><label>Date</label><input type="date" id="eDate" value="${today}"></div>
+      <div><label>Category</label><select id="eCat">${["Rent", "Electricity / Bills", "Salary", "Stock purchase", "Transport", "Marketing", "Other"].map(x => `<option>${x}</option>`).join("")}</select></div>
+      <div style="flex:2 1 160px"><label>Note</label><input id="eNote" placeholder="Optional"></div>
+      <div><label>Amount (Rs)</label><input id="eAmt" type="number" min="0" step="any"></div>
+      <div style="flex:0 0 auto"><button class="btn gold" id="eAdd">Add expense</button></div></div>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th>Category</th><th>Note</th><th class="r">Amount</th><th></th></tr></thead>
+      <tbody>${list.length ? list.map(e => `<tr><td>${esc(e.date)}</td><td><span class="badge">${esc(e.category)}</span></td><td>${esc(e.note) || "—"}</td><td class="r">${money(e.amount)}</td><td class="r"><button class="btn red sm" onclick="delExpense('${e.id}')">✕</button></td></tr>`).join("") : `<tr><td colspan="5" class="empty">No expenses recorded</td></tr>`}</tbody></table></div></div>`;
+  $("eAdd").onclick = () => {
+    const amt = num($("eAmt").value); if (amt <= 0 || !$("eDate").value) return toast("Enter a date and amount", "err");
+    S.expenses.push({ id: uid(), ts: Date.now(), date: $("eDate").value, category: $("eCat").value, note: $("eNote").value.trim(), amount: amt });
+    save(); toast("Expense added", "ok"); vExpenses();
+  };
+}
+async function delExpense(id) { if (await confirmBox("Delete this expense?", "Delete")) { S.expenses = S.expenses.filter(e => e.id !== id); save(); vExpenses(); } }
+
+/* =====================================================================
+   SETTINGS + BACKUP
+   ===================================================================== */
+function backupNow() {
+  S.settings.lastBackup = Date.now(); save();
+  download("qscents-backup-" + dayKey(Date.now()) + ".json", JSON.stringify(S, null, 2), "application/json");
+  toast("Backup downloaded", "ok"); if (view === "dashboard") vDashboard();
+}
+async function vSettings() {
+  const st = S.settings;
+  const snaps = (await idbAll("snaps")).sort().reverse();
+  const persisted = navigator.storage && navigator.storage.persisted ? await navigator.storage.persisted() : false;
+  $("main").innerHTML = head("Settings", "Shop details, receipts, security and data") + `
+    <div class="grid2"><div>
+      <div class="card"><h3>Shop & receipt</h3>
+        <div class="row"><div><label>Shop name</label><input id="sName" value="${esc(st.shopName)}"></div><div><label>Tagline</label><input id="sTag" value="${esc(st.tagline)}"></div></div>
+        <div style="margin-top:10px"><label>Address</label><input id="sAddr" value="${esc(st.address)}"></div>
+        <div style="margin-top:10px"><label>Phone numbers</label><input id="sPhone" value="${esc(st.phone)}"></div>
+        <div style="margin-top:10px"><label>Receipt footer (one line per row)</label><textarea id="sFoot" rows="3">${esc(st.footer)}</textarea></div>
+        <div class="row" style="margin-top:10px">
+          <div><label>Receipt size</label><select id="sPaper"><option value="80" ${st.paper==="80"?"selected":""}>80mm Thermal</option><option value="a4" ${st.paper==="a4"?"selected":""}>A4</option></select></div>
+          <div><label>Default tax %</label><input id="sTax" type="number" min="0" step="any" value="${st.taxPct}"></div>
+          <div><label>Low-stock alert at</label><input id="sLow" type="number" min="0" value="${st.lowStock}"></div>
+        </div>
+        <div style="margin-top:14px"><button class="btn gold" id="sSave">Save settings</button></div>
+      </div>
+      <div class="card"><h3>Security</h3>
+        <div class="row"><div><label>PIN lock (blank = off)</label><input id="sPin" type="password" inputmode="numeric" maxlength="8" placeholder="${st.pin ? "PIN is set – type new to change" : "4–8 digits"}"></div>
+        <div style="flex:0 0 auto"><button class="btn blue" id="pinSave">Save PIN</button></div></div>
+        <p class="hint">The PIN locks the screen against casual access. It is not encryption.</p>
+      </div></div>
+    <div>
+      <div class="card"><h3>Your data</h3>
+        <p class="hint" style="margin-top:0">${S.sales.length} sales · ${S.products.length} products · ${S.expenses.length} expenses stored in this browser.
+        ${persisted ? "Browser has marked this storage as <b class='pos'>persistent</b>." : "Clearing browser data would erase it – download backups regularly."}</p>
+        <div class="row"><button class="btn green" id="bk">Download backup</button><button class="btn amber" id="rs">Restore backup</button><input type="file" id="rsFile" accept=".json" class="hidden"></div>
+        <p class="hint">Last manual backup: ${st.lastBackup ? fmtDate(st.lastBackup) : "never"}</p>
+      </div>
+      <div class="card"><h3>Automatic daily snapshots</h3>
+        <p class="hint" style="margin-top:0">A copy of all data is saved automatically once a day (last 14 kept) in a second storage area as protection against accidents.</p>
+        ${snaps.length ? snaps.map(k => `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;margin:6px 0"><span>${esc(k)}</span><span><button class="btn blue sm" data-s="${esc(k)}">Restore</button> <button class="btn ghost sm" data-dl="${esc(k)}">Download</button></span></div>`).join("") : `<div class="hint">No snapshots yet – the first appears after your next saved change.</div>`}
+      </div>
+      <div class="card"><h3>Danger zone</h3><button class="btn red" id="wipe">Erase all data</button></div>
+    </div></div>`;
+  $("sSave").onclick = () => {
+    Object.assign(S.settings, { shopName: $("sName").value.trim() || "Q Scents", tagline: $("sTag").value.trim(), address: $("sAddr").value.trim(), phone: $("sPhone").value.trim(), footer: $("sFoot").value,
+      paper: $("sPaper").value, taxPct: Math.max(0, num($("sTax").value)), lowStock: Math.max(0, parseInt($("sLow").value) || 0) });
+    save(); applyPaper(); $("brandName").textContent = S.settings.shopName; toast("Settings saved", "ok");
+  };
+  $("pinSave").onclick = () => { const p = $("sPin").value.trim(); S.settings.pin = p ? hashPin(p) : ""; save(); $("sPin").value = ""; toast(p ? "PIN set" : "PIN removed", "ok"); };
+  $("bk").onclick = backupNow;
+  $("rs").onclick = () => $("rsFile").click();
+  $("rsFile").onchange = e => {
+    const f = e.target.files[0]; if (!f) return; const r = new FileReader();
+    r.onload = async () => {
+      try { const d = JSON.parse(r.result); if (!Array.isArray(d.products) || !Array.isArray(d.sales)) throw 0;
+        if (!await confirmBox("This replaces ALL current data with the backup. Continue?", "Restore", "amber")) return;
+        S = normalize(d); save(); toast("Backup restored", "ok"); applyTheme(); go("dashboard");
+      } catch { toast("Invalid backup file", "err"); }
+    }; r.readAsText(f); e.target.value = "";
+  };
+  $("main").querySelectorAll("[data-s]").forEach(b => b.onclick = async () => {
+    if (!await confirmBox("Replace current data with the snapshot from " + b.dataset.s + "?", "Restore", "amber")) return;
+    const raw = await idbGet("snaps", b.dataset.s); if (raw) { S = normalize(JSON.parse(raw)); save(); toast("Snapshot restored", "ok"); go("dashboard"); }
+  });
+  $("main").querySelectorAll("[data-dl]").forEach(b => b.onclick = async () => { const raw = await idbGet("snaps", b.dataset.dl); if (raw) download("qscents-snapshot-" + b.dataset.dl + ".json", raw, "application/json"); });
+  $("wipe").onclick = async () => {
+    if (!await confirmBox("Erase ALL sales, products and expenses? Download a backup first.", "Erase everything")) return;
+    if (!await confirmBox("Really erase everything? This cannot be undone.", "Yes, erase")) return;
+    const keep = S.settings; S = { products: [], sales: [], expenses: [], held: [], nextNo: 1001, settings: keep, lastSnap: "" }; save(); toast("All data erased"); go("dashboard");
+  };
+}
+
+/* =====================================================================
+   THEME, LOCK, INIT
+   ===================================================================== */
+function applyTheme() { document.documentElement.dataset.theme = S.settings.theme; $("brandName").textContent = S.settings.shopName; document.title = S.settings.shopName + " – POS"; applyPaper(); }
+$("themeBtn").onclick = () => {
+  const h = document.documentElement; h.classList.add("theme-fade");
+  S.settings.theme = S.settings.theme === "dark" ? "light" : "dark"; save(); applyTheme();
+  setTimeout(() => h.classList.remove("theme-fade"), 500);
+};
+function lock() {
+  if (!S.settings.pin) return toast("Set a PIN in Settings first");
+  $("lockRoot").innerHTML = `<div class="lock"><div class="box"><div class="logo" style="margin:0 auto 14px;width:56px;height:56px;font-size:28px">Q</div>
+    <h2 style="margin:0 0 4px">${esc(S.settings.shopName)}</h2><p class="hint">Enter PIN to unlock</p>
+    <input id="pinIn" type="password" inputmode="numeric" style="text-align:center;font-size:20px;letter-spacing:6px" autofocus>
+    <p id="pinErr" class="neg" style="height:18px"></p></div></div>`;
+  const inp = $("pinIn"); inp.focus();
+  inp.onkeydown = e => {
+    if (e.key !== "Enter") return;
+    if (hashPin(inp.value) === S.settings.pin) {
+      const L = $("lockRoot").firstElementChild; L.style.transition = "opacity .3s, transform .3s"; L.style.opacity = 0; L.style.transform = "scale(1.04)";
+      setTimeout(() => $("lockRoot").innerHTML = "", 300);
+    } else {
+      $("pinErr").textContent = "Wrong PIN"; inp.value = "";
+      inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake");
+    }
+  };
+}
+$("lockBtn").onclick = lock;
+
+/* ---------- motion helpers ---------- */
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* totals on the sale screen: roll the number from its old value to the new one */
+function setAmt(id, v, prefix = "") {
+  const el = $(id); if (!el) return;
+  v = Math.round(v * 100) / 100;
+  const from = el._v; el._v = v;
+  cancelAnimationFrame(el._raf);
+  const final = prefix + money(v);
+  if (from === undefined || from === v || reduceMotion) { el.textContent = final; return; }
+  if (id === "tNet") { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+  const t0 = performance.now(), dur = 380;
+  const step = now => {
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = p < 1 ? prefix + money(from + (v - from) * e) : final;
+    if (p < 1) el._raf = requestAnimationFrame(step);
+  };
+  el._raf = requestAnimationFrame(step);
+}
+
+/* dashboard / report stat tiles count up when they appear */
+function countUp(b) {
+  if (b.dataset.anim) return; b.dataset.anim = "1";
+  const txt = b.textContent.trim();
+  const m = txt.match(/^(Rs )?(-?[\d,]+(?:\.\d+)?)$/);
+  if (!m || reduceMotion) return;
+  const target = parseFloat(m[2].replace(/,/g, "")); if (!target) return;
+  const pre = m[1] || "", t0 = performance.now(), dur = 900;
+  const step = now => {
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    b.textContent = p < 1 ? pre + Math.round(target * e).toLocaleString("en-PK") : txt;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+new MutationObserver(() => document.querySelectorAll(".stat b:not([data-anim])").forEach(countUp))
+  .observe($("main"), { childList: true, subtree: true });
+
+/* green tick after a sale is saved */
+function celebrate() {
+  if (reduceMotion) return;
+  const d = document.createElement("div"); d.className = "celebrate";
+  d.innerHTML = `<div class="ring"><svg viewBox="0 0 64 64"><path d="M16 34 L28 46 L48 20"/></svg></div>`;
+  document.body.appendChild(d);
+  setTimeout(() => d.classList.add("out"), 800); setTimeout(() => d.remove(), 1100);
+}
+
+/* ripple on every .btn press */
+document.addEventListener("pointerdown", e => {
+  const b = e.target.closest && e.target.closest(".btn"); if (!b || reduceMotion) return;
+  const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height);
+  const sp = document.createElement("span"); sp.className = "ripple";
+  sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+  b.appendChild(sp); setTimeout(() => sp.remove(), 650);
+});
+
+document.addEventListener("keydown", e => { if (e.ctrlKey && e.key === "Enter" && view === "sale") completeSale(); });
+
+(async function init() {
+  let r = loadLocal();
+  if (!r) {   // localStorage empty – try the IndexedDB mirror before starting fresh
+    const raw = await idbGet("kv", "state");
+    if (raw) { try { S = normalize(JSON.parse(raw)); localStorage.setItem(KEY, JSON.stringify(S)); r = "recovered"; } catch {} }
+  }
+  applyTheme();
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  if (r === "migrated") toast("Previous records imported successfully", "ok");
+  if (r === "recovered") toast("Data recovered from automatic backup", "ok");
+  if (S.settings.pin) lock();
+  go("dashboard");
+})();
+</script>
+</body>
+</html>
